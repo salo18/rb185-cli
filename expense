@@ -1,0 +1,40 @@
+#! /usr/bin/env ruby
+
+require "pg"
+
+def list_expenses
+  db = PG.connect(dbname: "expenses")
+
+  result = db.exec "SELECT * FROM expenses ORDER BY created_on ASC"
+
+  result.each do |row|
+    columns = [ row["id"].rjust(3),
+                row["created_on"].rjust(10),
+                row["amount"].rjust(12),
+                row["memo"] ]
+
+    puts columns.join(" | ")
+  end
+end
+
+def display_help
+  puts <<~HELP
+    An expense recording system
+
+    Commands:
+
+    add AMOUNT MEMO [DATE] - record a new expense
+    clear - delete all expenses
+    list - list all expenses
+    delete NUMBER - remove expense with id NUMBER
+    search QUERY - list expenses with a matching memo field"
+  HELP
+end
+
+command = ARGV.first
+
+if command == "list"
+  list_expenses
+else
+  display_help
+end
